@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIn Job Search Usability Improvements
 // @namespace    http://tampermonkey.net/
-// @version      0.2.11
+// @version      0.2.11.1
 // @description  Make it easier to review and manage job search results, with faster keyboard shortcuts, read post tracking, and blacklists for companies and jobs
 // @author       Bryan Chan
 // @match        https://www.linkedin.com/jobs/search/*
@@ -9,23 +9,29 @@
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant       GM_xmlhttpRequest
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
+// @require https://gist.github.com/raw/2625891/waitForKeyElements.js
 // ==/UserScript==
 
 (function() {
     'use strict';
 
     /** Selectors for key elements */
-    const JOBS_LIST_SELECTOR = "ul.jobs-search-results__list"
-    const ACTIVE_JOB_SELECTOR = ".jobs-search-results-list__list-item--active"
+    const JOBS_LIST_SELECTOR = "div.jobs-search-results-list"
+    const JOBS_LIST_CONTAINER_SELECTOR = ".scaffold-layout__list-container"
+    const ACTIVE_JOB_SELECTOR = "div.jobs-search-results-list__list-item--active"
     const JOB_CARD_COMPANY_NAME_SELECTOR = "a.job-card-container__company-name"
     const JOB_CARD_POST_TITLE_SELECTOR = ".job-card-list__title"
-    const JOB_SEARCH_RESULTS_FEEDBACK_CLASS = "jobs-list-feedback"
+    const JOB_SEARCH_RESULTS_FEEDBACK_CLASS = ".jobs-list-feedback"
 
-    const DETAIL_POST_TITLE_SELECTOR = ".jobs-details-top-card__job-title"
-    const DETAIL_COMPANY_SELECTOR = ".jobs-details-top-card__company-url"
+    const DETAIL_POST_TITLE_SELECTOR = ".t-24.t-bold.jobs-unified-top-card__job-title"
+    const DETAIL_COMPANY_SELECTOR = ".jobs-unified-top-card__company-name"
 
     const NEXT_PAGE_SELECTOR = ".artdeco-pagination__indicator--number.active"
     const PREV_PAGE_SELECTOR = ".artdeco-pagination__indicator--number.active"
+
+    const LOOP_SAFE_LIMIT = 50
 
     function nextJobEl(jobCardEl) {
         return jobCardEl.nextElementSibling
@@ -83,13 +89,14 @@
     const readPosts = new StoredDictionary("read_posts");
 
     /** Install key handlers to allow for keyboard interactions */
+
     const KEY_HANDLER = {
         "e": handleMarkRead, // toggle marking the active post as read
-        "j": goToNext, // open the next visible job post
-        "k": goToPrevious, // open the previous visible job post
+        "s": goToNext, // open the next visible job post
+        "w": goToPrevious, // open the previous visible job post
         "h": toggleHidden, // toggle showing the hidden posts
-        "n": handleNextPage, // go to the next page
-        "p": handlePrevPage, // go to the previous page
+        "d": handleNextPage, // go to the next page
+        "a": handlePrevPage, // go to the previous page
         "x": handleHidePost, // hide post forever,
         "X": handleShowPost, // show post again
         "y": handleHideCompany, // hide company forever
@@ -104,6 +111,11 @@
 
     /** Event handler functions */
     const FEEDBACK_DELAY = 300;
+
+    const DIRECTION = {
+        UP: 1,
+        DOWN: 2
+    }
 
     // Toggle whether to hide posts
     var showHidden = false;
@@ -186,16 +198,20 @@
 
 
     const PAGE_DELAY = 300; // delay after loading new page to go to the first element
+
+
     function handleNextPage() {
         const activePage = document.querySelector(NEXT_PAGE_SELECTOR);
-        if(!activePage) return;
+        if(!activePage || !activePage.nextElementSibling) return;
+
         const nextPage = activePage.nextElementSibling.firstElementChild;
         triggerClick(nextPage);
     }
 
     function handlePrevPage() {
         const activePage = document.querySelector(PREV_PAGE_SELECTOR);
-        if(!activePage) return;
+        if(!activePage || !activePage.previousElementSibling) return;
+
         const prevPage = activePage.previousElementSibling.firstElementChild;
         triggerClick(prevPage);
     }
@@ -240,7 +256,7 @@
 
     /** Functions to adjust jobs list display, based on which companies, posts are hidden and which posts are read */
     function getJobsList() {
-        return document.querySelector(JOBS_LIST_SELECTOR);
+        return document.querySelectorAll(JOBS_LIST_SELECTOR)[0];
     }
     var updateQueued = false;
     var updateTimer = null;
@@ -255,7 +271,8 @@
     }
     function updateDisplay() {
         const start = +new Date();
-        const jobsList = getJobsList();
+        const jobsListDiv = getJobsList();
+        const jobsList = jobsListDiv.querySelector(JOBS_LIST_CONTAINER_SELECTOR)
         for(var job = jobsList.firstElementChild; job && job.nextSibling; job = nextJobEl(job)) {
             try {
                 const data = getCardData(job);
@@ -303,39 +320,49 @@
         triggerClick(clickableDiv);
     }
 
-    function goToNext() {
+    function iterVisibleJobPage(active, direction) {
+        var pg_shift = active
+
+        for (let i = 0; i < LOOP_SAFE_LIMIT; i++) {
+            if (direction == DIRECTION.UP) {
+                pg_shift = prevJobEl(pg_shift);
+            }
+            if (direction == DIRECTION.DOWN){
+                pg_shift = nextJobEl(pg_shift);
+            }
+            if (!pg_shift || !isHidden(pg_shift)) {
+                return pg_shift;
+            }
+        }
+    }
+
+    function shiftWorkPage(direction) {
         const active = getActive();
-        if(active) {
-            var next = nextJobEl(active)
-            while(isHidden(next)) {
-                next = nextJobEl(next);
-            }
-            if(next.firstElementChild) {
-                triggerClick(jobClickTarget(next));
-            } else { // no next job, try for the next page
-                handleNextPage();
-            }
-        } else {
+        if(!active) {
             goToFirst();
+            return;
+        }
+
+        var pgNext = iterVisibleJobPage(active, direction);
+
+        if(pgNext && pgNext.firstElementChild) {
+            triggerClick(jobClickTarget(pgNext));
+        } else {
+            // no previous job, try to shift page
+            // yep, select case is worse than ifs
+            if (direction == DIRECTION.UP) handlePrevPage();
+            if (direction == DIRECTION.DOWN) handleNextPage();
         }
     }
 
     function goToPrevious() {
-        const active = getActive();
-        if(active) {
-            var prev = prevJobEl(active);
-            while(isHidden(prev)) {
-                prev = prevJobEl(prev);
-            }
-            if(prev.firstElementChild) {
-                triggerClick(jobClickTarget(prev));
-            } else { // no previous job, try to go to the previous page
-                handlePrevPage();
-            }
-        } else {
-            goToFirst();
-        }
+        shiftWorkPage(DIRECTION.UP)
     }
+
+    function goToNext() {
+        shiftWorkPage(DIRECTION.DOWN)
+    }
+
 
     function triggerClick (node) {
         triggerMouseEvent (node, "mouseover");
@@ -390,6 +417,7 @@
         for(let mutation of mutationsList) {
             const target = mutation.target;
             if (mutation.type === 'childList') {
+                console.log("Update queued");
                 queueUpdate();
             }
             else if (mutation.type === 'attributes') {
@@ -403,6 +431,11 @@
     const observer = new MutationObserver(callback);
 
     // Start observing the target node for configured mutations
-    observer.observe(getJobsList(), config);
+    var $ = window.jQuery;
+    waitForKeyElements (JOBS_LIST_SELECTOR, actionFunction);
+
+    function actionFunction (jNode) {
+        observer.observe(getJobsList(), config);
+    }
 }());
 
