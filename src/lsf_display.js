@@ -5,12 +5,15 @@ LSF.prototype.createDisplay = function() {
 };
 
 LSF.prototype.queueUpdate = function() {
-	if (this.updateTimer)
+	if (this.updateTimer){
 		clearTimeout(this.updateTimer);
+		return;
+	}
 
 	this.updateTimer = setTimeout(() => {
 		this.updateTimer = null;
-		this.updateDisplay();
+		// this.updateDisplay();
+		waitForKeyElements(LSF.SELECTORS.CARDS_LIST_CONTAINER, this.updateDisplay.bind(this));
 	}, 30);
 };
 
@@ -149,7 +152,7 @@ LSF.prototype.updateDisplay = function() {
 	const start = +new Date();
 
 	const cards = this.getCards();
-	for (let i = 0; i < cards.length; i++) {
+	for (let i = cards.length - 1; i < 0; i--) {
 		this.updateCardDisplay(cards[i]);
 	}
 	// TODO finsih

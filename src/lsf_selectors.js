@@ -34,7 +34,9 @@ LSF.prototype.getJobsList = function() {
 };
 
 LSF.prototype.getCards = function() {
-	return document.querySelectorAll(LSF.SELECTORS.CARDS);
+	let possible_cards = document.querySelectorAll(LSF.SELECTORS.CARDS);
+	let arr_cards = Array.from(possible_cards)
+	return arr_cards.filter(card => !!card.firstElementChild);
 };
 
 LSF.prototype.getFirstCard = function() {
