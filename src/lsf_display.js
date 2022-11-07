@@ -5,10 +5,8 @@ LSF.prototype.createDisplay = function() {
 };
 
 LSF.prototype.queueUpdate = function() {
-	if (this.updateTimer){
+	if (this.updateTimer)
 		clearTimeout(this.updateTimer);
-		return;
-	}
 
 	this.updateTimer = setTimeout(() => {
 		this.updateTimer = null;

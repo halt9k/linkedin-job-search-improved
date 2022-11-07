@@ -20,17 +20,27 @@ LSF.SELECTORS = {
 	SEARCH_FIELD: '.jobs-search-box__text-input',
 };
 
+LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
+	if (!from_node)
+		from_node = document;
+	let ret_node = from_node.querySelector(selector);
+
+	if (!ret_node)
+		console.warn('missing expected node on selector: ' + selector.toString())
+	return ret_node;
+}
+
 /** Extracts card data from a card */
 LSF.prototype.getCompanyName = function(node) {
-	return node.querySelector(LSF.SELECTORS.CARD_COMPANY_NAME);
+	return this.tryQuerySelector(LSF.SELECTORS.CARD_COMPANY_NAME, node);
 };
 
 LSF.prototype.getPostTitle = function(node) {
-	return node.querySelector(LSF.SELECTORS.CARD_POST_TITLE);
+	return this.tryQuerySelector(LSF.SELECTORS.CARD_POST_TITLE, node);
 };
 
 LSF.prototype.getJobsList = function() {
-	return document.querySelector(LSF.SELECTORS.CARDS_LIST_CONTAINER);
+	return this.tryQuerySelector(LSF.SELECTORS.CARDS_LIST_CONTAINER);
 };
 
 LSF.prototype.getCards = function() {
@@ -45,7 +55,7 @@ LSF.prototype.getFirstCard = function() {
 
 /** Get active job card */
 LSF.prototype.getActiveCard = function() {
-	const active = document.querySelector(LSF.SELECTORS.ACTIVE_CARD);
+	const active = this.tryQuerySelector(LSF.SELECTORS.ACTIVE_CARD);
 	return active ? active.parentNode.parentNode : undefined;
 };
 
@@ -66,6 +76,6 @@ LSF.prototype.getCardData = function(node) {
 };
 
 LSF.prototype.isSeacrhActive = function() {
-	let sBox = document.querySelector(LSF.SELECTORS.SEARCH_FIELD);
+	let sBox = this.tryQuerySelector(LSF.SELECTORS.SEARCH_FIELD);
 	return document.activeElement === sBox;
 };
