@@ -34,20 +34,3 @@ LSF.prototype.fuzzy_match = function(text, pattern) {
 
 	return cache(pattern).test(text);
 };
-
-LSF.fixFirefoxScriptCahche = function () {
-	let url = `https://localhost:8000/src/linkedin_search_fixed.user.js?ts=${(+new Date())}`
-	console.log('Cahche update attempt ' + url);
-
-	GM.xmlHttpRequest({
-	    method: "GET",
-	    url: url,
-	    onload: function(response) {
-	        let remoteScript = document.createElement('script')
-	        remoteScript.id = 'tm-dev-script'
-	        remoteScript.innerHTML = response.responseText
-	        document.body.appendChild(remoteScript)
-	    }
-	})
-}
-LSF.fixFirefoxScriptCahche();
