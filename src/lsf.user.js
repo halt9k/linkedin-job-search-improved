@@ -13,13 +13,13 @@
 // @grant        GM_xmlhttpRequest
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @require      https://localhost:8000/src/lsf_utility.js
-// @require      https://localhost:8000/src/lsf_persistent.js
-// @require      https://localhost:8000/src/lsf_selectors.js
-// @require      https://localhost:8000/src/lsf_navigation.js
-// @require      https://localhost:8000/src/lsf_ratings.js
-// @require      https://localhost:8000/src/lsf_display.js
-// @require      https://localhost:8000/src/linkedin_search_fixed.user.js
+// @require      file:///V:\lsf_utility.js
+// @require      file:///V:\lsf_persistent.js
+// @require      file:///V:\lsf_selectors.js
+// @require      file:///V:\lsf_navigation.js
+// @require      file:///V:\lsf_ratings.js
+// @require      file:///V:\lsf_display.js
+// @require      file:///V:\lsf.user.js
 // ==/UserScript==
 
 /** Event handler functions */
@@ -73,7 +73,7 @@ LSF.prototype.startObserve = function(jNode) {
 	window.addEventListener('keydown', this.keyListener.bind(this));
 };
 
-LSF.prototype.attach = function() {
+LSF.prototype.attach = function(dummy) {
 	console.log('Starting LinkedIn Job Search Usability Improvements');
 
 	/** Add styles to handle hiding */

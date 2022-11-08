@@ -11,7 +11,7 @@ LSF.prototype.queueUpdate = function() {
 	this.updateTimer = setTimeout(() => {
 		this.updateTimer = null;
 		// this.updateDisplay();
-		waitForKeyElements(LSF.SELECTORS.CARDS_LIST_CONTAINER, this.updateDisplay.bind(this));
+		waitForKeyElements(LSF.SELECTORS.CARD_COMPANY_NAME, this.updateCallback.bind(this));
 	}, 30);
 };
 
@@ -145,6 +145,12 @@ LSF.prototype.updateCardDisplay = function(card) {
 		jobDiv.classList.remove('read');
 	}
 };
+
+
+
+LSF.prototype.updateCallback = function(dummy) {
+	this.updateDisplay();
+}
 
 LSF.prototype.updateDisplay = function() {
 	const start = +new Date();
