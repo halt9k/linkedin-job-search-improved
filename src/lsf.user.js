@@ -17,6 +17,7 @@
 // @require      file:///V:\lsf_persistent.js
 // @require      file:///V:\lsf_selectors.js
 // @require      file:///V:\lsf_navigation.js
+// @require      file:///V:\lsf_observe.js
 // @require      file:///V:\lsf_ratings.js
 // @require      file:///V:\lsf_display.js
 // @require      file:///V:\lsf.user.js
@@ -49,12 +50,12 @@ LSF.prototype.keyListener = function(e) {
 	handler.bind(this)();
 };
 
-LSF.prototype.jobListObserver = function(mutationsList, observer) {
+LSF.prototype.cardsChanged = function(mutationsList, observer) {
 	// Use traditional 'for loops' for IE 11
 	for (let mutation of mutationsList) {
 		// const target = mutation.target;
 		if (mutation.type === 'childList') {
-			// console.log('Update queued, ' + mutation.type + ' ' + mutation.target.attributes);
+			console.log('Update queued, ' + mutation.type + ' ' + mutation.target.attributes);
 			this.queueUpdate();
 		} else if (mutation.type === 'attributes') {
 			//console.log('The ' + mutation.attributeName + ' attribute was modified.', target);
@@ -63,17 +64,20 @@ LSF.prototype.jobListObserver = function(mutationsList, observer) {
 };
 
 // Start observing the target node for configured mutations
-LSF.prototype.startObserve = function(jNode) {
-	this.observer = new MutationObserver(this.jobListObserver.bind(this));
+LSF.prototype.startCardsObserver = function(source: Node) {
+	this.cardsObserver = new MutationObserver(this.cardsChanged.bind(this));
 
 	console.log('Adding mutation observer');
 	const config = {attributes: false, childList: true, subtree: true};
-	this.observer.observe(this.getJobsList(), config);
-
-	window.addEventListener('keydown', this.keyListener.bind(this));
+	this.cardsObserver.observe(this.getJobsList(), config);
 };
 
-LSF.prototype.attach = function(dummy) {
+new MutationObserver(() => {
+  console.log('mutation on document body');
+  // rest of the code you need when an element is appended
+}).observe( document.body, { childList: true })
+
+LSF.prototype.attach = function() {
 	console.log('Starting LinkedIn Job Search Usability Improvements');
 
 	/** Add styles to handle hiding */
@@ -81,7 +85,11 @@ LSF.prototype.attach = function(dummy) {
 	GM_addStyle('.hidden { display: none }');
 	GM_addStyle('.read { opacity: 0.3 }');
 
-	this.startObserve();
+	// waitForKeyElements uses $
+	const $ = window.jQuery;
+	waitForKeyElements(LSF.SELECTORS.CARDS_LIST_CONTAINER, this.startCardsObserver.bind(this));
+
+	window.addEventListener('keydown', this.keyListener.bind(this));
 };
 
 const lsf = new LSF();
@@ -90,6 +98,4 @@ const lsf = new LSF();
 unsafeWindow.LSF = LSF;
 unsafeWindow.lsf = lsf;
 
-// waitForKeyElements uses $
-const $ = window.jQuery;
-waitForKeyElements(LSF.SELECTORS.CARDS_LIST_CONTAINER, lsf.attach.bind(lsf));
+lsf.attach();

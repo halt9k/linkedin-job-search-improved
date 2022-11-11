@@ -10,7 +10,7 @@ LSF.SELECTORS = {
 	CARD_COMPANY_NAME: '.job-card-container__company-name',
 	CARD_POST_TITLE: '.job-card-list__title',
 
-	// DETAIL_ALL: '.jobs-search__job-details--container',
+	DETAIL_ALL: '.jobs-search__job-details--container',
 	DETAIL_POST_TITLE: '.jobs-unified-top-card__job-title',
 	DETAIL_COMPANY: '.jobs-unified-top-card__company-name',
 	DETAIL_DESC: '.jobs-description',
