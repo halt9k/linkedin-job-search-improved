@@ -1,5 +1,3 @@
-test/test_page/Test1_files/
-test/test_page/Test1.htm
-test/https_server/cert.pem
-test/https_server/key.pem
-Chrome/
+test/test_page/
+.idea/
+test/
