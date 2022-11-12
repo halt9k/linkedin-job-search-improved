@@ -1,3 +1,11 @@
+
+LSF.prototype.addStyles = function(){
+	/** Add styles to handle hiding */
+	GM_addStyle(`.${LSF.SELECTORS.CARDS_LIST_CLASS} { display: none }`);
+	GM_addStyle('.hidden { display: none }');
+	GM_addStyle('.read { opacity: 0.3 }');
+}
+
 // Toggle whether to hide posts
 LSF.prototype.createDisplay = function() {
 	this.showHidden = false;
@@ -10,8 +18,7 @@ LSF.prototype.queueUpdate = function() {
 
 	this.updateTimer = setTimeout(() => {
 		this.updateTimer = null;
-		// this.updateDisplay();
-		waitForKeyElements(LSF.SELECTORS.CARD_COMPANY_NAME, this.updateCallback.bind(this));
+		this.updateDisplay();
 	}, 30);
 };
 
@@ -147,10 +154,6 @@ LSF.prototype.updateCardDisplay = function(card) {
 };
 
 
-
-LSF.prototype.updateCallback = function(dummy) {
-	this.updateDisplay();
-}
 
 LSF.prototype.updateDisplay = function() {
 	const start = +new Date();
