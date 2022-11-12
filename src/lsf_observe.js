@@ -1,26 +1,40 @@
 
-
-
-LSF.prototype.attachObserver = function(target: Node, callback: function) {
-	addedNode.matches('.job-card-list')
+// TODO 1 redirect callback
+LSF.prototype.onCardsChanged = function(mutationsList, observer) {
+	// Use traditional 'for loops' for IE 11
+	for (let mutation of mutationsList) {
+		// const target = mutation.target;
+		if (mutation.type === 'childList') {
+			console.log('Update queued, ' + mutation.type + ' ' + mutation.target.attributes);
+			this.queueUpdate();
+		} else if (mutation.type === 'attributes') {
+			//console.log('The ' + mutation.attributeName + ' attribute was modified.', target);
+		}
+	}
 };
 
+LSF.prototype.callIfMatches = function(addedNode, track){
+    for (const pair of track){
+        if (addedNode.matches(pair[0]))
+            pair[1]();
+    }
+}
 
-// Start observing the target node for configured mutations
-LSF.prototype.startObserver = function(source: Node) {
-	this.cardsObserver = new MutationObserver(this.cardsChanged.bind(this));
+LSF.prototype.onMutation = function (mutationRecords, _observer) {
+	//TODO
+	// '.job-card-list'
+	let track =  [[LSF.SELECTORS.CARDS_LIST_CONTAINER, this.onCardsChanged]];
 
-	console.log('Adding mutation observer');
-	const config = {attributes: false, childList: true, subtree: true};
-	this.cardsObserver.observe(this.getJobsList(), config);
+    for (const mutation of mutationRecords) {
+        mutation.addedNodes.forEach((node) => {
+			this.callIfMatches(node, track);
+        });
+    }
 };
-
-new MutationObserver(() => {
-  console.log('mutation on document body');
-  // rest of the code you need when an element is appended
-}).observe( document.body, { childList: true })
 
 LSF.prototype.startObservers = function() {
+	this.observer = new MutationObserver(this.onMutation.bind(this));
+	const config = {attributes: false, childList: true, subtree: true};
+	this.observer.observe(document, config);
 
-	window.addEventListener('keydown', this.keyListener.bind(this));
 };
