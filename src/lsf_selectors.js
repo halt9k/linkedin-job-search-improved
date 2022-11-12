@@ -26,9 +26,10 @@ LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
 	let ret_node = from_node.querySelector(selector);
 
 	if (!ret_node)
-		console.warn('missing expected node on selector: ' + selector.toString())
+		console.warn('missing expected node on selector: ' +
+		             selector.toString());
 	return ret_node;
-}
+};
 
 /** Extracts card data from a card */
 LSF.prototype.getCompanyName = function(node) {
@@ -45,7 +46,7 @@ LSF.prototype.getJobsList = function() {
 
 LSF.prototype.getCards = function() {
 	let possible_cards = document.querySelectorAll(LSF.SELECTORS.CARDS);
-	let arr_cards = Array.from(possible_cards)
+	let arr_cards = Array.from(possible_cards);
 	return arr_cards.filter(card => !!card.firstElementChild);
 };
 
