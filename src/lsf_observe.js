@@ -1,6 +1,6 @@
 
 // TODO 1 redirect callback
-LSF.prototype.onCardsChanged = function(mutationsList, observer) {
+LSF.prototype.onCardsChanged = function(_node) {
 	// Use traditional 'for loops' for IE 11
 	for (let mutation of mutationsList) {
 		// const target = mutation.target;
@@ -13,6 +13,10 @@ LSF.prototype.onCardsChanged = function(mutationsList, observer) {
 	}
 };
 
+LSF.prototype.onJobDetailsChanged = function(_node) {
+	console.log('Details changed');
+}
+
 LSF.prototype.callIfMatches = function(addedNode, track){
     for (const pair of track){
         if (addedNode.matches(pair[0]))
@@ -21,9 +25,6 @@ LSF.prototype.callIfMatches = function(addedNode, track){
 }
 
 LSF.prototype.onMutation = function (mutationRecords, _observer) {
-	//TODO
-	// '.job-card-list'
-	let track =  [[LSF.SELECTORS.CARDS_LIST_CONTAINER, this.onCardsChanged]];
 
     for (const mutation of mutationRecords) {
         mutation.addedNodes.forEach((node) => {
@@ -32,9 +33,26 @@ LSF.prototype.onMutation = function (mutationRecords, _observer) {
     }
 };
 
+LSF.addObserveInstruction = function(a_selector, a_callback) {
+	return {selector: a_selector, callback: a_callback};
+};
+
+
 LSF.prototype.startObservers = function() {
+	console.log('Starting observers');
+
+	let _AI = LSF.addObserveInstruction;
+	this.observeInstructions =  [
+		_AI(LSF.SELECTORS.CARDS, this.onCardsChanged),
+		_AI(LSF.SELECTORS.DETAIL_ALL, this.onJobDetailsChanged),
+	];
+
+	// Will filter out elements above, but not below
+	// filtering elemnts below still needs to be done manually
+	this.observeSelectors = this.observeInstructions.map(i=>(i.selector))
+
 	this.observer = new MutationObserver(this.onMutation.bind(this));
-	const config = {attributes: false, childList: true, subtree: true};
+	const config = {attributeFilter: this.observeSelectors, childList: true, subtree: true};
 	this.observer.observe(document, config);
 
 };
