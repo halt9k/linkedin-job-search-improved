@@ -5,6 +5,7 @@
 // @description  Make it easier to review and manage job search results, with faster keyboard shortcuts, read post tracking, and blacklists for companies and jobs
 // @author       Bryan Chan, halt9k
 // @match        https://www.linkedin.com/jobs/search/*
+// @match        file:///V:/test/*
 // @license      GNU GPLv3
 // @grant        unsafeWindow
 // @grant        GM_addStyle
@@ -12,14 +13,15 @@
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
-// @require      file:///V:\lsf_utility.js
-// @require      file:///V:\lsf_persistent.js
-// @require      file:///V:\lsf_selectors.js
-// @require      file:///V:\lsf_navigation.js
-// @require      file:///V:\lsf_observe.js
-// @require      file:///V:\lsf_ratings.js
-// @require      file:///V:\lsf_display.js
-// @require      file:///V:\lsf.user.js
+// @require      file:///V:/src/lsf_utility.js
+// @require      file:///V:/src/lsf_persistent.js
+// @require      file:///V:/src/lsf_selectors.js
+// @require      file:///V:/src/lsf_navigation.js
+// @require      file:///V:/src/lsf_observe_helper.js
+// @require      file:///V:/src/lsf_observe.js
+// @require      file:///V:/src/lsf_ratings.js
+// @require      file:///V:/src/lsf_display.js
+// @require      file:///V:/src/lsf.user.js
 // ==/UserScript==
 
 /** Event handler functions */

@@ -1,35 +1,31 @@
 
-// TODO 1 redirect callback
 LSF.prototype.onCardsChanged = function(_node) {
-	// Use traditional 'for loops' for IE 11
-	for (let mutation of mutationsList) {
-		// const target = mutation.target;
-		if (mutation.type === 'childList') {
-			console.log('Update queued, ' + mutation.type + ' ' + mutation.target.attributes);
-			this.queueUpdate();
-		} else if (mutation.type === 'attributes') {
-			//console.log('The ' + mutation.attributeName + ' attribute was modified.', target);
-		}
-	}
+	console.assert(typeof(this) === LSF);
+	console.log('Cards update queued');
+
+	this.queueUpdate();
 };
 
 LSF.prototype.onJobDetailsChanged = function(_node) {
-	console.log('Details changed');
+	console.assert(typeof(this) === LSF);
+	console.log('Details update queued');
+
 }
 
-LSF.prototype.callIfMatches = function(addedNode, track){
-    for (const pair of track){
-        if (addedNode.matches(pair[0]))
-            pair[1]();
+LSF.prototype.callIfMatches = function(node){
+    for (const pair of this.observeInstructions){
+        if (node.matches(pair.selector))
+            pair.callback.bind(this)();
     }
 }
 
 LSF.prototype.onMutation = function (mutationRecords, _observer) {
+	console.log('Mutation fired')
 
+	// Use traditional 'for loops' for IE 11
     for (const mutation of mutationRecords) {
-        mutation.addedNodes.forEach((node) => {
-			this.callIfMatches(node, track);
-        });
+    	//if (mutation.type === 'childList')
+    	this.callIfMatches(mutation.target);
     }
 };
 
@@ -43,7 +39,7 @@ LSF.prototype.startObservers = function() {
 
 	let _AI = LSF.addObserveInstruction;
 	this.observeInstructions =  [
-		_AI(LSF.SELECTORS.CARDS, this.onCardsChanged),
+		_AI(LSF.SELECTORS.CARDS_LIST_CONTAINER, this.onCardsChanged),
 		_AI(LSF.SELECTORS.DETAIL_ALL, this.onJobDetailsChanged),
 	];
 
@@ -53,6 +49,8 @@ LSF.prototype.startObservers = function() {
 
 	this.observer = new MutationObserver(this.onMutation.bind(this));
 	const config = {attributeFilter: this.observeSelectors, childList: true, subtree: true};
-	this.observer.observe(document, config);
+	// this.observer.observe(document.childNodes[1], config);
 
+	this.testCd = new LSF.NodeObserver(LSF.SELECTORS.CARDS_LIST_CONTAINER, false, this.updateDisplay);
+	this.testOb = new LSF.NodeObserver(LSF.SELECTORS.DETAIL_ALL, false, this.onJobDetailsChanged);
 };
