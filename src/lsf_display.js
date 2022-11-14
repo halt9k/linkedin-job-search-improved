@@ -1,10 +1,9 @@
-
-LSF.prototype.addStyles = function(){
+LSF.prototype.addStyles = function() {
 	/** Add styles to handle hiding */
 	GM_addStyle(`.${LSF.SELECTORS.CARDS_LIST_CLASS} { display: none }`);
 	GM_addStyle('.hidden { display: none }');
 	GM_addStyle('.read { opacity: 0.3 }');
-}
+};
 
 // Toggle whether to hide posts
 LSF.prototype.createDisplay = function() {
@@ -12,19 +11,9 @@ LSF.prototype.createDisplay = function() {
 	this.updateTimer = null;
 };
 
-LSF.prototype.queueUpdate = function() {
-	if (this.updateTimer)
-		clearTimeout(this.updateTimer);
-
-	this.updateTimer = setTimeout(() => {
-		this.updateTimer = null;
-		this.updateDisplay();
-	}, 30);
-};
-
 LSF.prototype.toggleHidden = function() {
 	this.showHidden = !this.showHidden;
-	this.queueUpdate();
+	this.updateCards();
 };
 
 /** Check if a card is hidden */
@@ -57,7 +46,7 @@ LSF.prototype.handleHidePost = function() {
 		detailPostTitle.style.textDecoration = 'none';
 		this.hiddenPosts.set(data.postUrl,
 		                     `${data.companyName}: ${data.postTitle}`);
-		this.updateDisplay();
+		this.updateCards();
 	}, LSF.FEEDBACK_DELAY);
 };
 
@@ -68,7 +57,7 @@ LSF.prototype.handleShowPost = function() {
 
 	this.goToNext();
 	this.hiddenPosts.delete(data.postUrl);
-	this.updateDisplay();
+	this.updateCardDisplay(activeJob);
 };
 
 // Handle request to hide all posts from a company, forever
@@ -90,7 +79,7 @@ LSF.prototype.handleHideCompany = function() {
 		this.goToNext();
 		detailCompany.style.textDecoration = 'none';
 		this.hiddenCompanies.set(data.companyUrl, data.companyName);
-		this.updateDisplay();
+		this.updateCards();
 	}, LSF.FEEDBACK_DELAY);
 };
 
@@ -108,7 +97,7 @@ LSF.prototype.handleShowCompany = function() {
 
 	this.goToNext();
 	this.hiddenCompanies.delete(data.companyUrl);
-	this.updateDisplay();
+	this.updateCards();
 };
 
 // Handl request to mark a post as read (
@@ -130,7 +119,7 @@ LSF.prototype.handleMarkRead = function() {
 		this.readPosts.set(data.postUrl,
 		                   `${data.companyName}: ${data.postTitle}`);
 	}
-	this.updateDisplay();
+	this.updateCards();
 };
 
 LSF.prototype.updateCardDisplay = function(card) {
@@ -153,18 +142,19 @@ LSF.prototype.updateCardDisplay = function(card) {
 	}
 };
 
+LSF.prototype.updateCards = function() {
+	this.perfLog(() => {
+		const cards = this.getCards();
 
+		for (let i = cards.length - 1; i >= 0; i--) {
+			this.updateCardDisplay(cards[i]);
+		}
+	});
+};
 
-LSF.prototype.updateDisplay = function() {
-	const start = +new Date();
-
-	const cards = this.getCards();
-	for (let i = cards.length - 1; i < 0; i--) {
-		this.updateCardDisplay(cards[i]);
-	}
-	// TODO finsih
-	this.calcScores();
-
-	const elapsed = +new Date() - start;
-	console.log('Updated display on jobs list in', elapsed, 'ms');
+LSF.prototype.updateDescription = function() {
+	this.perfLog(() => {
+		// TODO finsih
+		this.calcScores();
+	});
 };

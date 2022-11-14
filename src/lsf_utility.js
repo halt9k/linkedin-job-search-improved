@@ -34,3 +34,12 @@ LSF.prototype.fuzzy_match = function(text, pattern) {
 
 	return cache(pattern).test(text);
 };
+
+LSF.prototype.perfLog = function(targetMethod) {
+	const start = +new Date();
+
+	targetMethod();
+
+	const elapsed = +new Date() - start;
+	console.log(targetMethod.name + ' elapsed: '+ elapsed + ' ms');
+};

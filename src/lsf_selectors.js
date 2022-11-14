@@ -7,7 +7,10 @@ LSF.SELECTORS = {
 	ACTIVE_CARD: '.jobs-search-results-list__list-item--active',
 	CARDS_LIST_CLASS: '.jobs-list-feedback',
 
-	CARD_COMPANY_NAME: '.job-card-container__company-name',
+	// .job-card-container__company-name without .ember-view
+	// will get also names of companies
+	// which do not have registered link, skipping them for now
+	CARD_COMPANY_NAME: '.job-card-container__company-name.ember-view',
 	CARD_POST_TITLE: '.job-card-list__title',
 
 	DETAIL_ALL: '.jobs-search__job-details--container',
@@ -44,10 +47,13 @@ LSF.prototype.getJobsList = function() {
 	return this.tryQuerySelector(LSF.SELECTORS.CARDS_LIST_CONTAINER);
 };
 
-LSF.prototype.getCards = function() {
+LSF.prototype.getCards = function(toIncludeEmpty = false) {
 	let possible_cards = document.querySelectorAll(LSF.SELECTORS.CARDS);
 	let arr_cards = Array.from(possible_cards);
-	return arr_cards.filter(card => !!card.firstElementChild);
+	if (!toIncludeEmpty)
+		return arr_cards.filter(card => !!card.firstElementChild)
+	else
+		return arr_cards;
 };
 
 LSF.prototype.getFirstCard = function() {
