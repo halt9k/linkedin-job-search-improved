@@ -3,16 +3,19 @@ LSF.prototype.onCardListChanged = function(_node) {
 	console.log('Cards update queued');
 
 	let card_list = this.getCards(true);
-	let id_list = card_list.map(card => card.id)
+	let id_list = card_list.map(card => card.id);
 
-	this.obsCards = this.obsCards.filter(obs => id_list.includes(obs.id))
-	let unchanged_id_list = this.obsCards.map(obs => obs.id)
+	this.obsCards = this.obsCards.filter(obs => id_list.includes(obs.id));
+	let unchanged_id_list = this.obsCards.map(obs => obs.id);
 
-	let new_id_list = id_list.filter(id => !unchanged_id_list.includes(id))
+	let new_id_list = id_list.filter(id => !unchanged_id_list.includes(id));
 
 	for (let id of new_id_list) {
 		const node = document.getElementById(id);
-		const obs = new LSF.NodeObserver(null, id, true, this.onCardChanged.bind(this, node), 5);
+		const obs = new LSF.NodeObserver(null,
+		                                 id,
+		                                 true,
+		                                 this.onCardChanged.bind(this, node));
 		this.obsCards.push(obs);
 	}
 };
@@ -45,23 +48,20 @@ LSF.prototype.startObservers = function() {
 	let _AI = LSF.addObserveInstruction;
 	this.observeInstructions = [
 		_AI(LSF.SELECTORS.CARDS_LIST_CONTAINER, this.onCardListChanged),
-		_AI(LSF.SELECTORS.DETAIL_ALL, this.onJobDetailsChanged),
+		_AI(LSF.SELECTORS.DETAILS_ALL, this.onJobDetailsChanged),
 	];
 
 	// Will filter out elements above, but not below
 	// filtering elemnts below still needs to be done manually
 	this.observeSelectors = this.observeInstructions.map(i => (i.selector));
 
+	this.obsCards = [];
 	this.obsCardList = new LSF.NodeObserver(LSF.SELECTORS.CARDS_LIST_CONTAINER,
 	                                        null,
 	                                        false,
-	                                        this.onCardListChanged.bind(this),
-	                                        5);
-	this.obsDetails = new LSF.NodeObserver(LSF.SELECTORS.DETAIL_ALL,
+	                                        this.onCardListChanged.bind(this));
+	this.obsDetails = new LSF.NodeObserver(LSF.SELECTORS.DETAILS_ALL,
 	                                       null,
 	                                       false,
-	                                       this.onJobDetailsChanged.bind(
-	                                       this),
-	                                       3);
-	this.obsCards = [];
+	                                       this.onJobDetailsChanged.bind(this));
 };

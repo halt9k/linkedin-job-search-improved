@@ -9,7 +9,7 @@ LSF.SCORING = [
 ];
 
 LSF.prototype.calcScores = function() {
-	let desc = document.querySelector(LSF.SELECTORS.DETAIL_DESC);
+	let desc = document.querySelector(LSF.SELECTORS.DETAILS_DESC);
 
 	let score = 0;
 	let text = desc.textContent;
