@@ -12,15 +12,24 @@ LSF.SELECTORS = {
 	// which do not have registered link, skipping them for now
 	CARD_COMPANY_NAME: '.job-card-container__company-name.ember-view',
 	CARD_POST_TITLE: '.job-card-list__title',
+	///CARD_LOAD_FINISHED: [
+	///	'.job-card-container__footer-item',
+	///	'.job-flavors__flavor',
+	///],
+	///CARD_LOAD_MIN_CHILDS: 5,
 
-	DETAIL_ALL: '.jobs-search__job-details--container',
-	DETAIL_POST_TITLE: '.jobs-unified-top-card__job-title',
-	DETAIL_COMPANY: '.jobs-unified-top-card__company-name',
-	DETAIL_DESC: '.jobs-description',
+	DETAILS_ALL: '.jobs-search__job-details--container',
+	DETAILS_TITLE: '.jobs-unified-top-card__job-title',
+	DETAILS_COMPANY: '.jobs-unified-top-card__company-name',
+	DETAILS_DESC: '.jobs-description',
+	/// DETAILS_LOAD_FINISHED: 'jobs-description__details',
+	/// DETAILS_LOAD_MIN_CHILDS: 3,
 
 	ACTIVE_PAGE: '.artdeco-pagination__indicator--number.active',
 
 	SEARCH_FIELD: '.jobs-search-box__text-input',
+
+	PAGE_LOADING_NODE_PLACEHOLDER: 'div[class*="__ghost-placeholder"]',
 };
 
 LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
@@ -51,7 +60,7 @@ LSF.prototype.getCards = function(toIncludeEmpty = false) {
 	let possible_cards = document.querySelectorAll(LSF.SELECTORS.CARDS);
 	let arr_cards = Array.from(possible_cards);
 	if (!toIncludeEmpty)
-		return arr_cards.filter(card => !!card.firstElementChild)
+		return arr_cards.filter(card => !!card.firstElementChild);
 	else
 		return arr_cards;
 };

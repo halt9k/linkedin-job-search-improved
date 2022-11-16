@@ -37,7 +37,7 @@ LSF.prototype.handleHidePost = function() {
 	const postTitle = this.getPostTitle(activeJob);
 	postTitle.style.textDecoration = 'line-through';
 
-	const detailPostTitle = document.querySelector(LSF.SELECTORS.DETAIL_POST_TITLE);
+	const detailPostTitle = document.querySelector(LSF.SELECTORS.DETAILS_TITLE);
 	detailPostTitle.style.textDecoration = 'line-through';
 
 	// Wait a little and then hide post
@@ -70,7 +70,7 @@ LSF.prototype.handleHideCompany = function() {
 	const company = this.getCompanyName(activeJob);
 	company.style.textDecoration = 'line-through';
 
-	const detailCompany = document.querySelector(LSF.SELECTORS.DETAIL_COMPANY);
+	const detailCompany = document.querySelector(LSF.SELECTORS.DETAILS_COMPANY);
 	detailCompany.style.textDecoration = 'line-through';
 
 	// Wait a little and then hide company
@@ -92,7 +92,7 @@ LSF.prototype.handleShowCompany = function() {
 	const company = this.getCompanyName(activeJob);
 	company.style.textDecoration = 'none';
 
-	const detailCompany = document.querySelector(LSF.SELECTORS.DETAIL_COMPANY);
+	const detailCompany = document.querySelector(LSF.SELECTORS.DETAILS_COMPANY);
 	detailCompany.style.textDecoration = 'none';
 
 	this.goToNext();
