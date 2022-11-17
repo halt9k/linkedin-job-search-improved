@@ -13,15 +13,18 @@ LSF.prototype.calcScores = function() {
 
 	let score = 0;
 	let text = desc.textContent;
+	let scoreLog = '';
+
 
 	for (let entry of LSF.SCORING) {
 		for (let pattern of entry.words) {
 			// pattern.pattern()
 			if (this.fuzzy_match(text, pattern))
 				score += entry.weight;
-			console.log(pattern, entry.weight);
+			scoreLog += pattern + ' ' + entry.weight;
 		}
 	}
 
+	console.log(scoreLog);
 };
 
