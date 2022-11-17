@@ -27,21 +27,34 @@ LSF.SELECTORS = {
 
 	ACTIVE_PAGE: '.artdeco-pagination__indicator--number.active',
 
-	SEARCH_FIELD: '.jobs-search-box__text-input',
+	SEARCH_FIELDS: '.jobs-search-box__text-input',
 
-	PAGE_LOADING_NODE_PLACEHOLDER: 'div[class*="__ghost-placeholder"]',
+	PAGE_UPDATE_PLACEHOLDERS: 'div[class*="ghost-placeholder"]',
 };
 
-LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
+LSF.prototype.tryQuery = function(selector, all, from_node) {
 	if (!from_node)
 		from_node = document;
-	let ret_node = from_node.querySelector(selector);
+
+	let ret_node = null;
+	if (!all)
+		ret_node = from_node.querySelector(selector)
+	else
+		ret_node = from_node.querySelectorAll(selector);
 
 	if (!ret_node)
 		console.warn('missing expected node on selector: ' +
 		             selector.toString());
 	return ret_node;
 };
+
+LSF.prototype.tryQuerySelectorAll = function(selector, from_node = null) {
+	return this.tryQuery(selector, true, from_node)
+}
+
+LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
+	return this.tryQuery(selector, false, from_node)
+}
 
 /** Extracts card data from a card */
 LSF.prototype.getCompanyName = function(node) {
@@ -92,6 +105,6 @@ LSF.prototype.getCardData = function(node) {
 };
 
 LSF.prototype.isSeacrhActive = function() {
-	let sBox = this.tryQuerySelector(LSF.SELECTORS.SEARCH_FIELD);
-	return document.activeElement === sBox;
+	let nodes = this.tryQuerySelectorAll(LSF.SELECTORS.SEARCH_FIELDS);
+	return Object.values(nodes).includes(document.activeElement);
 };

@@ -41,5 +41,6 @@ LSF.prototype.perfLog = function(targetMethod) {
 	targetMethod();
 
 	const elapsed = +new Date() - start;
-	console.log(targetMethod.name + ' elapsed: '+ elapsed + ' ms');
+	if (elapsed > 20)
+		console.log(targetMethod.name + ' elapsed > 20ms: '+ elapsed);
 };

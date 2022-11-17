@@ -122,7 +122,15 @@ LSF.prototype.handleMarkRead = function() {
 	this.updateCards();
 };
 
+// cards below scroll
+LSF.prototype.isCardEmpty = function (card) {
+	return !!card.firstElementChild;
+}
+
 LSF.prototype.updateCardDisplay = function(card) {
+	if (!this.isCardEmpty(card))
+		return;
+
 	const data = this.getCardData(card);
 	const jobDiv = card.firstElementChild;
 

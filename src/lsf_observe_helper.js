@@ -6,89 +6,67 @@
 //      therefore query check is used
 
 LSF.NodeObserver = class {
-	QUEUE_DELAY_MS = 10;
+	constructor(a_rules) {
+		this.nodeData = {}
 
-	constructor(a_selector,
-	            a_id,
-	            a_observeRecursive,
-	            a_callback) {
-		console.assert(!a_selector !== !a_id);
+		for (const [a_selector, a_callback] of Object.entries(a_rules)) {
+			this.nodeData[a_selector] = {
+				observer: new MutationObserver(this.onChanges.bind(this, a_selector)),
+				callback: a_callback,
+				fired: false,
+				node: null,
+			};
+		}
 
-		this.selector = a_selector;
-		this.id = a_id;
-		this.callback = a_callback;
-		this.observeChilds = a_observeRecursive;
-
-		this.createObserver = null;
-		this.modifyObserver = null;
-
-		this.waitForNodeCreated();
+		this.tryObserve();
 	}
 };
 
-LSF.NodeObserver.prototype.tryFindNode = function() {
-	if (this.selector)
-		return document.querySelector(this.selector);
-	else
-		return document.getElementById(this.id);
+
+LSF.NodeObserver.prototype.tryObserve = function() {
+	// let new_nodes = nodes.filter(n => !this.prev_nodes.includes(n));
+
+	const config = {childList: true, subtree: true, attributeFilter: ['class']};
+	for (const [selector, data] of Object.entries(this.nodeData)) {
+		if (data.node)
+			continue;
+
+		data.node = document.querySelector(selector);
+		if (data.node)
+			data.observer.observe(data.node, config);
+
+		this.nodeData[selector] = data;
+	}
 };
 
-LSF.NodeObserver.prototype.waitForNodeCreated = function() {
-	if (this.tryFindNode()) {
-		this.onNodeCreated();
-		return;
+LSF.NodeObserver.prototype.onChanges = function(selector, _mutilations, _observer) {
+	this.nodeData[selector].fired = true;
+
+	if (this.isUpdateFinished()) {
+		// console.log('Page updated finished, firing queue');
+		this.fireChanges();
+	}
+};
+
+LSF.NodeObserver.prototype.isUpdateFinished = function() {
+	let nodes = Object.values(this.nodeData).map(d => d.node);
+	let valid_nodes = nodes.filter(n => !!n);
+	let updates = valid_nodes.filter(n => !!n.querySelector(LSF.SELECTORS.PAGE_UPDATE_PLACEHOLDERS));
+	return updates.length === 0;
+};
+
+LSF.NodeObserver.prototype.fireChanges = function() {
+	for (const [selector, data] of Object.entries(this.nodeData)) {
+		if (!data.fired)
+			continue;
+
+		data.observer.disconnect();
+		data.node = null;
+
+		data.callback();
+		data.fired = false;
+		this.nodeData[selector] = data;
 	}
 
-	this.createObserver = new MutationObserver(this.onNodeCreated.bind(this));
-	const config = {childList: true, subtree: true};
-	this.createObserver.observe(document.body, config);
-};
-
-LSF.NodeObserver.prototype.onNodeCreated = function() {
-	let node = this.tryFindNode();
-	if (!node || this.modifyObserver)
-		return;
-
-	if (this.createObserver) {
-		this.createObserver.disconnect();
-		this.createObserver = null;
-	}
-
-	this.modifyObserver = new MutationObserver(this.onNodeChanged.bind(this));
-	this.observerConfig = {childList: this.observeChilds, subtree: false, attributes: !this.observeChilds};
-
-	this.modifyObserver.observe(node, this.observerConfig);
-
-	// MutationObserver fires randomly, can be also before node created
-	this.onNodeChanged();
-};
-
-
-LSF.NodeObserver.isPageLoaded = function(){
-	return !document.querySelector(LSF.SELECTORS.PAGE_LOADING_NODE_PLACEHOLDER);
-}
-
-LSF.NodeObserver.delayedCalls = [];
-LSF.NodeObserver.waitPageLoad = function(onContinue) {
-	let _NO = LSF.NodeObserver;
-	if (!_NO.isPageLoaded()) {
-		_NO.delayedCalls.push(onContinue);
-	} else {
-		_NO.delayedCalls.forEach(f => f());
-		_NO.delayedCalls.clear();
-	}
-
-};
-
-LSF.NodeObserver.prototype.onNodeChanged = function() {
-
-	this.modifyObserver.disconnect();
-	LSF.NodeObserver.waitPageLoad(() => {
-		this.callback();
-		this.modifyObserver.observe(this.tryFindNode(), this.observerConfig);
-
-		// if (this.fireOnce)
-		// this.modifyObserver.detach();
-		// this.modifyObserver = null;
-	});
+	this.tryObserve();
 };
