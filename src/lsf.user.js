@@ -26,7 +26,7 @@
 
 /** Event handler functions */
 LSF.prototype.keyListener = function(e) {
-	if (this.isSeacrhActive())
+	if (!this.isHotkeyExpected())
 		return;
 
 	/** Install key handlers to allow for keyboard interactions */
