@@ -12,25 +12,23 @@ LSF.SELECTORS = {
 	// which do not have registered link, skipping them for now
 	CARD_COMPANY_NAME: '.job-card-container__company-name.ember-view',
 	CARD_POST_TITLE: '.job-card-list__title',
-	///CARD_LOAD_FINISHED: [
-	///	'.job-card-container__footer-item',
-	///	'.job-flavors__flavor',
-	///],
-	///CARD_LOAD_MIN_CHILDS: 5,
 
 	DETAILS_ALL: '.jobs-search__job-details--container',
 	DETAILS_TITLE: '.jobs-unified-top-card__job-title',
 	DETAILS_COMPANY: '.jobs-unified-top-card__company-name',
 	DETAILS_DESC: '.jobs-description',
-	/// DETAILS_LOAD_FINISHED: 'jobs-description__details',
-	/// DETAILS_LOAD_MIN_CHILDS: 3,
 
 	ACTIVE_PAGE: '.artdeco-pagination__indicator--number.active',
 
-	SEARCH_FIELDS: '.jobs-search-box__text-input',
-
 	PAGE_UPDATE_PLACEHOLDERS: 'div[class*="ghost-placeholder"]',
 };
+
+LSF.SELECTORS.HOTKEYS_ACTIVE_OVER = [
+	'body',
+	'.jobs-search__job-details',
+	'.jobs-description-content__text',
+	LSF.SELECTORS.CARDS
+];
 
 LSF.prototype.tryQuery = function(selector, all, from_node) {
 	if (!from_node)
@@ -38,7 +36,7 @@ LSF.prototype.tryQuery = function(selector, all, from_node) {
 
 	let ret_node = null;
 	if (!all)
-		ret_node = from_node.querySelector(selector)
+		ret_node = from_node.querySelector(selector);
 	else
 		ret_node = from_node.querySelectorAll(selector);
 
@@ -49,12 +47,12 @@ LSF.prototype.tryQuery = function(selector, all, from_node) {
 };
 
 LSF.prototype.tryQuerySelectorAll = function(selector, from_node = null) {
-	return this.tryQuery(selector, true, from_node)
-}
+	return this.tryQuery(selector, true, from_node);
+};
 
 LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
-	return this.tryQuery(selector, false, from_node)
-}
+	return this.tryQuery(selector, false, from_node);
+};
 
 /** Extracts card data from a card */
 LSF.prototype.getCompanyName = function(node) {
@@ -104,7 +102,7 @@ LSF.prototype.getCardData = function(node) {
 	return {companyUrl, companyName, postUrl, postTitle};
 };
 
-LSF.prototype.isSeacrhActive = function() {
-	let nodes = this.tryQuerySelectorAll(LSF.SELECTORS.SEARCH_FIELDS);
-	return Object.values(nodes).includes(document.activeElement);
+LSF.prototype.isHotkeyExpected = function() {
+	let active = document.activeElement;
+	return active.matches(LSF.SELECTORS.HOTKEYS_ACTIVE_OVER);
 };
