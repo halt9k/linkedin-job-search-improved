@@ -1,0 +1,64 @@
+html {
+    width: 500px;
+    max-width: 500px;
+    min-width: 500px;
+}
+
+body {
+    width: 500px;
+    max-width: 500px;
+    min-width: 500px;
+}
+
+.content {
+    max-width: 490px;
+    min-width: 490px;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.tab-body {
+    margin-top: 5px;
+}
+
+#new-word-form {
+    padding: 5px;
+}
+
+#groups-tab .color-picker-swatch {
+    width: 100%;
+}
+
+#words-table {
+    max-width: 490px;
+    min-width: 490px;
+}
+
+#words-table .control-column {
+    /* Width of 2 icons */
+    min-width: 94px;
+    max-width: 94px;
+}
+
+#import-tab {
+    width: 100%;
+}
+
+#import-tab h4 {
+    margin-top: 0;
+}
+
+#import-data {
+    width: 100%;
+    margin-top: 10px;
+ }
+
+#history-table .count-column {
+    width: 15px;
+}
+
+.form-validation-error {
+    color: red;
+}
