@@ -1,5 +1,8 @@
 /** Selectors for key elements */
 LSF.SELECTORS = {
+	// requred to queue ignition when none of selectors yet exist
+	DOCUMENT: 'body',
+
 	// CARDS_LIST: '.jobs-search-results-list',
 	CARDS_LIST_CONTAINER: '.scaffold-layout__list-container',
 
@@ -7,10 +10,12 @@ LSF.SELECTORS = {
 	ACTIVE_CARD: '.jobs-search-results-list__list-item--active',
 	CARDS_LIST_CLASS: '.jobs-list-feedback',
 
+	// obsolete?
 	// .job-card-container__company-name without .ember-view
 	// will get also names of companies
 	// which do not have registered link, skipping them for now
-	CARD_COMPANY_NAME: '.job-card-container__company-name.ember-view',
+	
+	CARD_COMPANY_NAME: '.job-card-container__company-name',
 	CARD_POST_TITLE: '.job-card-list__title',
 
 	DETAILS_ALL: '.jobs-search__job-details--container',
@@ -20,7 +25,7 @@ LSF.SELECTORS = {
 
 	ACTIVE_PAGE: '.artdeco-pagination__indicator--number.active',
 
-	PAGE_UPDATE_PLACEHOLDERS: 'div[class*="ghost-placeholder"]',
+	PAGE_UPDATING_PLACEHOLDERS: 'div[class*="ghost-placeholder"]',
 };
 
 LSF.SELECTORS.HOTKEYS_ACTIVE_OVER = [
@@ -30,28 +35,28 @@ LSF.SELECTORS.HOTKEYS_ACTIVE_OVER = [
 	LSF.SELECTORS.CARDS
 ];
 
-LSF.prototype.tryQuery = function(selector, all, from_node) {
-	if (!from_node)
-		from_node = document;
+LSF.prototype.tryQuery = function(selector, fromNode, verbose, all) {
+	if (!fromNode)
+		fromNode = document;
 
 	let ret_node = null;
 	if (!all)
-		ret_node = from_node.querySelector(selector);
+		ret_node = fromNode.querySelector(selector);
 	else
-		ret_node = from_node.querySelectorAll(selector);
+		ret_node = fromNode.querySelectorAll(selector);
 
-	if (!ret_node)
+	if (!ret_node && verbose)
 		console.warn('missing expected node on selector: ' +
 		             selector.toString());
 	return ret_node;
 };
 
-LSF.prototype.tryQuerySelectorAll = function(selector, from_node = null) {
-	return this.tryQuery(selector, true, from_node);
+LSF.prototype.tryQuerySelectorAll = function(selector, fromNode = null, verbose=true) {
+	return this.tryQuery(selector, fromNode, verbose, true);
 };
 
-LSF.prototype.tryQuerySelector = function(selector, from_node = null) {
-	return this.tryQuery(selector, false, from_node);
+LSF.prototype.tryQuerySelector = function(selector, fromNode = null, verbose=true) {
+	return this.tryQuery(selector, fromNode, verbose, false);
 };
 
 /** Extracts card data from a card */
@@ -90,8 +95,9 @@ LSF.prototype.getCardData = function(node) {
 	let companyUrl, companyName, postUrl, postTitle;
 	const company = this.getCompanyName(node);
 	if (company) {
-		companyUrl = company.getAttribute('href').split('?')[0];
-		companyName = company.text.trim(' ');
+		// companyUrl = company.getAttribute('href').split('?')[0];
+		companyUrl = '';
+		companyName = company.textContent.trim();
 	}
 
 	const post = this.getPostTitle(node);

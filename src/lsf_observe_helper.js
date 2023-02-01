@@ -7,7 +7,8 @@
 
 LSF.NodeObserver = class {
 	constructor(a_rules) {
-		this.nodeData = {}
+		this.nodeData = {};
+		this.docData = {};
 
 		for (const [a_selector, a_callback] of Object.entries(a_rules)) {
 			this.nodeData[a_selector] = {
@@ -18,12 +19,34 @@ LSF.NodeObserver = class {
 			};
 		}
 
-		this.tryObserve();
+		this.startPageLoadObserver();
 	}
 };
 
 
-LSF.NodeObserver.prototype.tryObserve = function() {
+LSF.NodeObserver.prototype.startPageLoadObserver = function() {
+	this.docData.node = lsf.tryQuerySelector(LSF.SELECTORS.DOCUMENT, null, false);
+	this.docData.observer = new MutationObserver(this.onDocumentChanged.bind(this));
+	const config = {childList: true, subtree: true, attributeFilter: ['class']};
+	this.docData.observer.observe(this.docData.node, config);
+};
+
+
+LSF.NodeObserver.prototype.onDocumentChanged = function() {
+	this.tryObserve(false);
+
+	let _obs = Object.values(this.nodeData).map(d => d.node)
+	let attached_observers = _obs.filter(n => !!n);
+
+	if (attached_observers.length > 0){
+		console.log('Page load detected, detaching initial document observer');
+		this.docData.observer.disconnect();
+		this.docData.observer = null;
+	}
+}
+
+
+LSF.NodeObserver.prototype.tryObserve = function(verbose) {
 	// let new_nodes = nodes.filter(n => !this.prev_nodes.includes(n));
 
 	const config = {childList: true, subtree: true, attributeFilter: ['class']};
@@ -31,7 +54,7 @@ LSF.NodeObserver.prototype.tryObserve = function() {
 		if (data.node)
 			continue;
 
-		data.node = document.querySelector(selector);
+		data.node = lsf.tryQuerySelector(selector, null, verbose);
 		if (data.node)
 			data.observer.observe(data.node, config);
 
@@ -43,7 +66,7 @@ LSF.NodeObserver.prototype.onChanges = function(selector, _mutilations, _observe
 	this.nodeData[selector].fired = true;
 
 	if (this.isUpdateFinished()) {
-		// console.log('Page updated finished, firing queue');
+		// console.log('Page update finished, firing queue');
 		this.fireChanges();
 	}
 };
@@ -51,7 +74,11 @@ LSF.NodeObserver.prototype.onChanges = function(selector, _mutilations, _observe
 LSF.NodeObserver.prototype.isUpdateFinished = function() {
 	let nodes = Object.values(this.nodeData).map(d => d.node);
 	let valid_nodes = nodes.filter(n => !!n);
-	let updates = valid_nodes.filter(n => !!n.querySelector(LSF.SELECTORS.PAGE_UPDATE_PLACEHOLDERS));
+
+	if (valid_nodes.length === 0)
+		return false;
+
+	let updates = valid_nodes.filter(n => !!lsf.tryQuerySelector(LSF.SELECTORS.PAGE_UPDATING_PLACEHOLDERS, n, false));
 	return updates.length === 0;
 };
 
@@ -68,5 +95,6 @@ LSF.NodeObserver.prototype.fireChanges = function() {
 		this.nodeData[selector] = data;
 	}
 
-	this.tryObserve();
+	// not all elements exist during first call, therefore multiple attempts
+	this.tryObserve(true);
 };
