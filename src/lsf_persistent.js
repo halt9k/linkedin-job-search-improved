@@ -1,4 +1,7 @@
 // Setup dictionaries to persist useful information across sessions
+
+/* globals LSF, unsafeWindow, console */
+
 LSF.StoredDictionary = class{
 	constructor(storageKey) {
 		this.storageKey = storageKey;

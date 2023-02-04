@@ -1,4 +1,3 @@
-///<reference path="../../../node_modules/@types/chrome/index.d.ts" />
 ///<reference path="dictionaryEntry.ts" />
 ///<reference path="group.ts" />
 ///<reference path="logger.ts" />

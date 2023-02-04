@@ -1,4 +1,7 @@
 /** Selectors for key elements */
+
+/* globals LSF, unsafeWindow, console */
+
 LSF.SELECTORS = {
 	// requred to queue ignition when none of selectors yet exist
 	DOCUMENT: 'body',

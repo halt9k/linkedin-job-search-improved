@@ -5,6 +5,8 @@
 //      none of common observers/events can handle proprly last one,
 //      therefore query check is used
 
+/* globals LSF, unsafeWindow, console */
+
 LSF.NodeObserver = class {
 	constructor(a_rules) {
 		this.nodeData = {};

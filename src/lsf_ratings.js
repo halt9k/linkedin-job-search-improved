@@ -1,3 +1,5 @@
+/* globals LSF, unsafeWindow, console, HL*/
+
 LSF.addScore = function(a_weight, a_words, a_fuzzy) {
 	return {weight: a_weight, words: a_words, fuzzy: a_fuzzy};
 };
@@ -26,5 +28,5 @@ LSF.prototype.calcScores = function() {
 	}
 
 	console.log(scoreLog);
+	HL.tryHighlight();
 };
-
